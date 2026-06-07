@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Sid · N-Finit Development LLC</title>
+  <meta name="description" content="Sid — Founder & Lead Developer at N-Finit Development LLC. Microsoft-powered apps, automation, and custom development." />
+  <meta property="og:title" content="Sid · N-Finit Development LLC" />
+  <meta property="og:description" content="Microsoft-powered apps, automation, and custom development." />
+  <meta property="og:type" content="profile" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- CSS Houdini: animated conic-gradient border -->
+  <style>
+    @property --border-angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+  </style>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #030c16;
+      --card-bg:    #071120;
+      --surface-2:  rgba(8, 20, 40, 0.96);
+      --accent:     #0078d4;
+      --accent-2:   #2fa3ff;
+      --accent-3:   #00d4ff;
+      --text:       #eef3ff;
+      --text-sub:   #8aa8c8;
+      --text-muted: #3a5a78;
+      --radius:     24px;
+      --radius-sm:  14px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(24px,5vh,60px) 16px clamp(32px,6vh,60px);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ── Three.js canvas ── */
+    #bg-canvas {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      z-index: 0; pointer-events: none;
+    }
+
+    /* ── Floating code symbols canvas ── */
+    #code-canvas {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      z-index: 1; pointer-events: none;
+    }
+
+    /* ── Outer wrapper ── */
+    .card-wrap {
+      position: relative; z-index: 10;
+      width: 100%; max-width: 415px;
+      animation: floatIn .65s cubic-bezier(.22,.68,0,1.15) both;
+    }
+
+    @keyframes floatIn {
+      from { opacity: 0; transform: translateY(44px) scale(.93); }
+      to   { opacity: 1; transform: translateY(0)    scale(1);   }
+    }
+
+    /* ── Animated gradient border shell ── */
+    .card-border {
+      border-radius: calc(var(--radius) + 2px);
+      padding: 1.5px;
+      background: conic-gradient(
+        from var(--border-angle),
+        rgba(0,120,212,0.03) 0deg,
+        #0078d4 75deg,
+        #2fa3ff 130deg,
+        #00d4ff 180deg,
+        #2fa3ff 230deg,
+        #0078d4 285deg,
+        rgba(0,120,212,0.03) 360deg
+      );
+      animation: spin-border 6s linear infinite;
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,0.75),
+        0 30px 90px rgba(0,0,0,0.82),
+        0 0 110px rgba(0,120,212,0.14),
+        0 0 220px rgba(0,120,212,0.07);
+      transition: box-shadow .35s ease;
+    }
+
+    @keyframes spin-border { to { --border-angle: 360deg; } }
+
+    .card-border:hover {
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,0.75),
+        0 36px 110px rgba(0,0,0,0.88),
+        0 0 160px rgba(0,120,212,0.24),
+        0 0 300px rgba(0,120,212,0.1);
+    }
+
+    /* ── Inner card ── */
+    .card {
+      border-radius: var(--radius);
+      background: var(--card-bg);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ── Shimmer accent bar ── */
+    .card-accent-bar {
+      height: 3px;
+      background: linear-gradient(90deg, #0078d4, #2fa3ff, #00d4ff, #2fa3ff, #0078d4);
+      background-size: 300% 100%;
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { background-position:   0% 0; }
+      50%       { background-position: 100% 0; }
+    }
+
+    /* ── Card header ── */
+    .card-header {
+      padding: 34px 28px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-header::before {
+      content: '';
+      position: absolute;
+      top: -55px; left: 50%;
+      transform: translateX(-50%);
+      width: 290px; height: 190px;
+      background: radial-gradient(ellipse, rgba(0,120,212,0.2) 0%, transparent 68%);
+      pointer-events: none;
+    }
+
+    /* ── Logo ── */
+    .logo {
+      width: 115px; height: auto;
+      display: block;
+      margin: 0 auto 18px;
+      position: relative; z-index: 1;
+      animation: logoGlow 3.4s ease-in-out infinite;
+    }
+
+    @keyframes logoGlow {
+      0%,100% { filter: drop-shadow(0 0 10px rgba(0,120,212,0.45)) drop-shadow(0 0 26px rgba(0,120,212,0.18)); }
+      50%      { filter: drop-shadow(0 0 22px rgba(47,163,255,0.74)) drop-shadow(0 0 52px rgba(47,163,255,0.3)); }
+    }
+
+    /* ── Name ── */
+    .name {
+      font-size: 2.2rem; font-weight: 900;
+      letter-spacing: -0.046em; line-height: 1.08;
+      margin-bottom: 7px;
+      background: linear-gradient(135deg, #eef3ff 10%, #2fa3ff 58%, #00d4ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative; z-index: 1;
+    }
+
+    /* ── Job title ── */
+    .job-title {
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--accent-2);
+      text-transform: uppercase; letter-spacing: 0.14em;
+      margin-bottom: 14px;
+      position: relative; display: inline-block; z-index: 1;
+    }
+
+    .job-title::after {
+      content: '';
+      position: absolute; bottom: -4px; left: 50%;
+      transform: translateX(-50%);
+      width: 0; height: 1.5px;
+      background: linear-gradient(90deg, transparent, var(--accent-2), transparent);
+      animation: expandLine 1s ease forwards .75s;
+    }
+
+    @keyframes expandLine { to { width: 100%; } }
+
+    /* ── Company badge ── */
+    .company-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 5px 14px;
+      border-radius: 100px;
+      border: 1px solid rgba(0,120,212,0.25);
+      background: rgba(0,120,212,0.08);
+      font-size: 0.74rem; font-weight: 500;
+      color: var(--text-sub);
+    }
+
+    .company-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent-2);
+      box-shadow: 0 0 6px var(--accent-2);
+      flex-shrink: 0;
+      animation: dotPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes dotPulse {
+      0%,100% { opacity: 1;   box-shadow: 0 0  6px var(--accent-2); }
+      50%      { opacity: 0.5; box-shadow: 0 0 14px var(--accent-2); }
+    }
+
+    .header-divider {
+      height: 1px; margin: 0 24px;
+      background: linear-gradient(90deg, transparent, rgba(0,120,212,0.22), transparent);
+    }
+
+    /* ── Card body ── */
+    .card-body { padding: 20px 20px 24px; }
+
+    /* ── Terminal tagline block ── */
+    .tagline-terminal {
+      border-radius: var(--radius-sm);
+      background: rgba(0,0,0,0.38);
+      border: 1px solid rgba(0,120,212,0.13);
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+
+    .terminal-titlebar {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 12px;
+      background: rgba(0,120,212,0.07);
+      border-bottom: 1px solid rgba(0,120,212,0.1);
+    }
+
+    .dot-r { width: 10px; height: 10px; border-radius: 50%; background: #ff5f57; }
+    .dot-y { width: 10px; height: 10px; border-radius: 50%; background: #febc2e; }
+    .dot-g { width: 10px; height: 10px; border-radius: 50%; background: #28c840; }
+
+    .terminal-label {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem; color: var(--text-muted);
+      letter-spacing: 0.08em;
+    }
+
+    .terminal-body { padding: 12px 14px 14px; }
+
+    .terminal-line {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .terminal-line .kw  { color: #569cd6; }
+    .terminal-line .str { color: #ce9178; }
+    .terminal-line .cm  { color: #6a9955; }
+
+    .tagline-output {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem; color: #9cdcfe;
+      line-height: 1.55;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 7px; height: 0.9em;
+      background: var(--accent-2);
+      vertical-align: middle; margin-left: 1px;
+      animation: blink .75s step-end infinite;
+    }
+
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* ── Contact list ── */
+    .contact-list {
+      display: flex; flex-direction: column;
+      gap: 9px; margin-bottom: 18px;
+    }
+
+    .contact-row {
+      display: flex; align-items: center; gap: 13px;
+      padding: 13px 15px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+      border: 1px solid rgba(255,255,255,0.04);
+      color: var(--text); text-decoration: none;
+      position: relative; overflow: hidden;
+      transition: background .2s, border-color .2s, transform .2s, box-shadow .2s;
+      opacity: 0; transform: translateX(-24px);
+      animation: slideInRow .4s ease forwards;
+    }
+
+    .contact-row::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(0,120,212,0.07) 50%, transparent 100%);
+      transform: translateX(-100%);
+      transition: transform .4s ease;
+    }
+
+    .contact-row:hover::after { transform: translateX(100%); }
+
+    .contact-row:nth-child(1) { animation-delay: .30s; }
+    .contact-row:nth-child(2) { animation-delay: .42s; }
+    .contact-row:nth-child(3) { animation-delay: .54s; }
+
+    @keyframes slideInRow { to { opacity: 1; transform: translateX(0); } }
+
+    .contact-row:hover {
+      background: rgba(0,120,212,0.1);
+      border-color: rgba(0,120,212,0.3);
+      transform: translateX(5px);
+      box-shadow: -5px 0 20px rgba(0,120,212,0.13), 0 6px 24px rgba(0,0,0,0.3);
+    }
+
+    .contact-row:active { transform: translateX(2px) scale(.99); }
+
+    .contact-icon {
+      width: 40px; height: 40px; border-radius: 11px;
+      background: rgba(0,120,212,0.1);
+      border: 1px solid rgba(0,120,212,0.18);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background .2s, border-color .2s;
+    }
+
+    .contact-row:hover .contact-icon {
+      background: rgba(0,120,212,0.22);
+      border-color: rgba(0,120,212,0.45);
+    }
+
+    .contact-icon i {
+      font-size: 1rem; color: var(--accent-2);
+      transition: color .2s;
+    }
+
+    .contact-row:hover .contact-icon i { color: var(--accent-3); }
+
+    .contact-info { flex: 1; min-width: 0; }
+
+    .contact-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem; font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      margin-bottom: 2px;
+    }
+
+    .contact-value {
+      font-size: 0.86rem; font-weight: 500; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      transition: color .2s;
+    }
+
+    .contact-row:hover .contact-value { color: var(--accent-2); }
+
+    .contact-arrow {
+      color: var(--text-muted); font-size: 0.72rem; flex-shrink: 0;
+      transition: color .2s, transform .2s;
+    }
+
+    .contact-row:hover .contact-arrow { color: var(--accent-2); transform: translateX(4px); }
+
+    /* ── Save Contact button ── */
+    .save-btn {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; width: 100%; padding: 15px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, #0078d4 0%, #005a9e 100%);
+      color: #fff; font-family: inherit;
+      font-size: 0.92rem; font-weight: 700; border: none; cursor: pointer;
+      letter-spacing: 0.04em;
+      position: relative; overflow: hidden;
+      transition: filter .2s, transform .18s, box-shadow .2s;
+      box-shadow: 0 6px 28px rgba(0,120,212,0.42), inset 0 1px 0 rgba(255,255,255,0.1);
+      margin-bottom: 20px;
+    }
+
+    .save-btn::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 55%);
+      pointer-events: none;
+    }
+
+    .save-btn:hover {
+      filter: brightness(1.12); transform: translateY(-2px);
+      box-shadow: 0 12px 36px rgba(0,120,212,0.56), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    .save-btn:active { transform: translateY(0); filter: brightness(.97); }
+
+    .ripple {
+      position: absolute; border-radius: 50%;
+      transform: scale(0);
+      animation: rippleOut .55s linear;
+      background: rgba(255,255,255,0.25);
+      pointer-events: none;
+    }
+
+    @keyframes rippleOut { to { transform: scale(4); opacity: 0; } }
+
+    /* ── QR section ── */
+    .qr-section {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 12px; padding: 18px 0 4px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .qr-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.63rem; font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.14em;
+    }
+
+    .qr-wrapper {
+      padding: 12px; background: #fff;
+      border-radius: 14px; line-height: 0;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.45), 0 0 0 1px rgba(0,120,212,0.12);
+      transition: transform .22s ease, box-shadow .22s ease;
+    }
+
+    .qr-wrapper:hover {
+      transform: scale(1.045);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.55), 0 0 32px rgba(0,120,212,0.22);
+    }
+
+    #qrcode canvas, #qrcode img { display: block; border-radius: 4px; }
+
+    /* ── Footer ── */
+    .card-footer {
+      padding: 12px 24px; text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.63rem; color: var(--text-muted);
+      border-top: 1px solid rgba(255,255,255,0.04);
+      letter-spacing: 0.04em;
+    }
+
+    .card-footer a { color: var(--accent-2); text-decoration: none; transition: color .15s; }
+    .card-footer a:hover { color: var(--accent-3); }
+
+    /* ── Responsive ── */
+    @media (max-width: 380px) {
+      .card-header { padding: 26px 18px 20px; }
+      .card-body   { padding: 16px 16px 20px; }
+      .name        { font-size: 1.85rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Three.js 3D background -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- Floating code symbols -->
+<canvas id="code-canvas"></canvas>
+
+<div class="card-wrap">
+  <div class="card-border" id="card-border">
+    <div class="card">
+
+      <!-- Shimmer bar -->
+      <div class="card-accent-bar"></div>
+
+      <!-- Header -->
+      <div class="card-header">
+        <img src="N-FNIT Logo.png" alt="N-Finit Development LLC" class="logo" />
+        <h1 class="name">Sid</h1>
+        <p class="job-title">Founder &amp; Lead Developer</p>
+        <div class="company-badge">
+          <span class="company-dot"></span>
+          N-Finit Development LLC
+        </div>
+      </div>
+
+      <div class="header-divider"></div>
+
+      <!-- Body -->
+      <div class="card-body">
+
+        <!-- Terminal / tagline block -->
+        <div class="tagline-terminal">
+          <div class="terminal-titlebar">
+            <span class="dot-r"></span>
+            <span class="dot-y"></span>
+            <span class="dot-g"></span>
+            <span class="terminal-label">mission.js</span>
+          </div>
+          <div class="terminal-body">
+            <div class="terminal-line"><span class="cm">// N-Finit Development LLC</span></div>
+            <div class="terminal-line">
+              <span class="kw">const</span> mission <span class="kw">=</span>
+              <span class="str">"</span><span class="tagline-output" id="tagline-out"></span><span class="str">"</span><span class="cursor"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact rows -->
+        <div class="contact-list">
+
+          <a href="tel:+15404530168" class="contact-row" aria-label="Call Sid">
+            <div class="contact-icon"><i class="fa-solid fa-phone"></i></div>
+            <div class="contact-info">
+              <div class="contact-label">Phone</div>
+              <div class="contact-value">540-453-0168</div>
+            </div>
+            <i class="fa-solid fa-chevron-right contact-arrow"></i>
+          </a>
+
+          <a href="mailto:sm@nfinitdevelopment.com" class="contact-row" aria-label="Email Sid">
+            <div class="contact-icon"><i class="fa-solid fa-envelope"></i></div>
+            <div class="contact-info">
+              <div class="contact-label">Email</div>
+              <div class="contact-value">sm@nfinitdevelopment.com</div>
+            </div>
+            <i class="fa-solid fa-chevron-right contact-arrow"></i>
+          </a>
+
+          <a href="https://nfinitdevelopment.com/" class="contact-row" target="_blank" rel="noopener noreferrer" aria-label="Visit website">
+            <div class="contact-icon"><i class="fa-solid fa-globe"></i></div>
+            <div class="contact-info">
+              <div class="contact-label">Website</div>
+              <div class="contact-value">nfinitdevelopment.com</div>
+            </div>
+            <i class="fa-solid fa-chevron-right contact-arrow"></i>
+          </a>
+
+        </div>
+
+        <!-- Save Contact CTA -->
+        <button class="save-btn" onclick="saveContact(event)" aria-label="Save contact to phone">
+          <i class="fa-solid fa-address-card"></i>
+          Save Contact
+        </button>
+
+        <!-- QR Code -->
+        <div class="qr-section">
+          <span class="qr-label">// scan to connect</span>
+          <div class="qr-wrapper">
+            <div id="qrcode"></div>
+          </div>
+        </div>
+
+      </div><!-- /card-body -->
+
+      <div class="card-footer">
+        <a href="https://nfinitdevelopment.com" target="_blank" rel="noopener noreferrer">nfinitdevelopment.com</a>
+        &nbsp;·&nbsp; N-Finit Development LLC
+        <br />&copy; <span id="copy-year"></span> N-Finit Development LLC. All rights reserved.
+      </div>
+
+    </div><!-- /card -->
+  </div><!-- /card-border -->
+</div><!-- /card-wrap -->
+
+<!-- Three.js r128 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- QR Code -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+/* ================================================================
+   THREE.JS — 3D background: wireframe icosahedra + torus rings + particles
+================================================================ */
+(function initThree() {
+  const canvas   = document.getElementById('bg-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.z = 7;
+
+  // Main wireframe sphere
+  const ico = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(2.6, 3),
+    new THREE.MeshBasicMaterial({ color: 0x0078d4, wireframe: true, transparent: true, opacity: 0.10 })
+  );
+
+  // Outer counter-rotating icosahedron
+  const outerIco = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(3.3, 1),
+    new THREE.MeshBasicMaterial({ color: 0x2fa3ff, wireframe: true, transparent: true, opacity: 0.04 })
+  );
+
+  // Torus ring 1
+  const torus1 = new THREE.Mesh(
+    new THREE.TorusGeometry(3.8, 0.011, 8, 100),
+    new THREE.MeshBasicMaterial({ color: 0x0078d4, transparent: true, opacity: 0.18 })
+  );
+  torus1.rotation.x = Math.PI / 3;
+
+  // Torus ring 2
+  const torus2 = new THREE.Mesh(
+    new THREE.TorusGeometry(3.0, 0.008, 8, 80),
+    new THREE.MeshBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.10 })
+  );
+  torus2.rotation.x = -Math.PI / 4;
+  torus2.rotation.y =  Math.PI / 5;
+
+  // Orbiting particle ring
+  const ringCount = 120;
+  const ringPos   = new Float32Array(ringCount * 3);
+  for (let i = 0; i < ringCount; i++) {
+    const a = (i / ringCount) * Math.PI * 2;
+    const r = 4.2 + (Math.random() - 0.5) * 0.6;
+    ringPos[i * 3]     = r * Math.cos(a);
+    ringPos[i * 3 + 1] = (Math.random() - 0.5) * 0.8;
+    ringPos[i * 3 + 2] = r * Math.sin(a);
+  }
+  const ringGeo = new THREE.BufferGeometry();
+  ringGeo.setAttribute('position', new THREE.BufferAttribute(ringPos, 3));
+  const ringPoints = new THREE.Points(ringGeo,
+    new THREE.PointsMaterial({ color: 0x2fa3ff, size: 0.06, transparent: true, opacity: 0.50 })
+  );
+
+  // Ambient star field
+  const starCount = 350;
+  const starPos   = new Float32Array(starCount * 3);
+  for (let i = 0; i < starCount; i++) {
+    const r = 8 + Math.random() * 14;
+    const theta = Math.random() * Math.PI * 2;
+    const phi   = Math.acos(2 * Math.random() - 1);
+    starPos[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
+    starPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+    starPos[i * 3 + 2] = r * Math.cos(phi);
+  }
+  const starGeo = new THREE.BufferGeometry();
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  const stars = new THREE.Points(starGeo,
+    new THREE.PointsMaterial({ color: 0x6ac0ff, size: 0.035, transparent: true, opacity: 0.40 })
+  );
+
+  scene.add(ico, outerIco, torus1, torus2, ringPoints, stars);
+
+  // Mouse parallax
+  let mx = 0, my = 0;
+  window.addEventListener('mousemove', e => {
+    mx = (e.clientX / window.innerWidth  - 0.5) * 2;
+    my = (e.clientY / window.innerHeight - 0.5) * 2;
+  });
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  (function animate() {
+    requestAnimationFrame(animate);
+    ico.rotation.x      += 0.003;
+    ico.rotation.y      += 0.005;
+    outerIco.rotation.x -= 0.002;
+    outerIco.rotation.y += 0.003;
+    outerIco.rotation.z += 0.001;
+    torus1.rotation.z   += 0.004;
+    torus2.rotation.z   -= 0.003;
+    torus2.rotation.y   += 0.001;
+    ringPoints.rotation.y += 0.006;
+    stars.rotation.y    += 0.0005;
+    scene.rotation.y += (mx * 0.10 - scene.rotation.y) * 0.025;
+    scene.rotation.x += (-my * 0.07 - scene.rotation.x) * 0.025;
+    renderer.render(scene, camera);
+  })();
+})();
+
+
+/* ================================================================
+   CANVAS 2D — floating code keyword particles
+================================================================ */
+(function initCodeParticles() {
+  const canvas = document.getElementById('code-canvas');
+  const ctx    = canvas.getContext('2d');
+  let W = canvas.width  = window.innerWidth;
+  let H = canvas.height = window.innerHeight;
+
+  const SYMS = [
+    'const','let','fn()','=> {}','[ ]','//','===',
+    '</>','async','await','class','import','&&','return',
+    'null','API','.NET','SQL','git','while','++',
+  ];
+
+  function makeP() {
+    return {
+      x:  Math.random() * W,
+      y:  H + Math.random() * 60,
+      vy: 0.22 + Math.random() * 0.38,
+      vx: (Math.random() - 0.5) * 0.22,
+      a:  0.06 + Math.random() * 0.12,
+      t:  SYMS[Math.floor(Math.random() * SYMS.length)],
+    };
+  }
+
+  const particles = Array.from({ length: 26 }, makeP);
+
+  window.addEventListener('resize', () => {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  });
+
+  (function draw() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.font = "500 11px 'JetBrains Mono', monospace";
+    ctx.fillStyle = '#2fa3ff';
+    particles.forEach(p => {
+      ctx.globalAlpha = p.a;
+      ctx.fillText(p.t, p.x, p.y);
+      p.y -= p.vy;
+      p.x += p.vx;
+      if (p.y < -24) Object.assign(p, makeP(), { y: H + 16 });
+    });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  })();
+})();
+
+
+/* ================================================================
+   QR CODE
+================================================================ */
+new QRCode(document.getElementById('qrcode'), {
+  text:         'https://nfinitdevelopment.com',
+  width:        144,
+  height:       144,
+  colorDark:    '#0078d4',
+  colorLight:   '#ffffff',
+  correctLevel: QRCode.CorrectLevel.H,
+});
+
+
+/* ================================================================
+   TYPEWRITER — tagline
+================================================================ */
+(function typewriter() {
+  const text = 'Microsoft-powered apps, automation, and custom development.';
+  const el   = document.getElementById('tagline-out');
+  let i = 0;
+  function type() {
+    if (i < text.length) { el.textContent += text[i++]; setTimeout(type, 36); }
+  }
+  setTimeout(type, 950);
+})();
+
+
+/* ================================================================
+   3D CARD TILT on mouse move
+================================================================ */
+(function cardTilt() {
+  const border = document.getElementById('card-border');
+  const wrap   = border.closest('.card-wrap');
+
+  wrap.addEventListener('mousemove', e => {
+    const rect = border.getBoundingClientRect();
+    const dx = (e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2);
+    const dy = (e.clientY - rect.top  - rect.height / 2) / (rect.height / 2);
+    border.style.transition = 'transform .1s ease';
+    border.style.transform  = `perspective(1000px) rotateY(${dx * 7}deg) rotateX(${-dy * 5}deg) scale(1.012)`;
+  });
+
+  wrap.addEventListener('mouseleave', () => {
+    border.style.transition = 'transform .5s cubic-bezier(.22,.68,0,1.2)';
+    border.style.transform  = 'perspective(1000px) rotateY(0deg) rotateX(0deg) scale(1)';
+  });
+})();
+
+
+/* ================================================================
+   SAVE CONTACT — vCard with ripple
+================================================================ */
+function saveContact(e) {
+  const btn  = e.currentTarget;
+  const rect = btn.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  const r    = document.createElement('span');
+  r.className = 'ripple';
+  r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size / 2}px;top:${e.clientY - rect.top - size / 2}px`;
+  btn.appendChild(r);
+  setTimeout(() => r.remove(), 600);
+
+  const vcf = [
+    'BEGIN:VCARD',
+    'VERSION:3.0',
+    'N:;Sid;;;',
+    'FN:Sid',
+    'ORG:N-Finit Development LLC',
+    'TITLE:Founder & Lead Developer',
+    'EMAIL;TYPE=WORK,INTERNET:sm@nfinitdevelopment.com',
+    'TEL;TYPE=WORK,VOICE:+15404530168',
+    'URL:https://nfinitdevelopment.com',
+    'NOTE:Microsoft-powered apps\\, automation\\, and custom development.',
+    'END:VCARD',
+  ].join('\r\n');
+
+  const blob = new Blob([vcf], { type: 'text/vcard;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), { href: url, download: 'Sid-NFinitDev.vcf' });
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('copy-year').textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
